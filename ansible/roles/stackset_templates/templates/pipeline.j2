@@ -1,0 +1,71 @@
+[
+  {"fields": [
+      {"key": "databaseName", "stringValue": "{{redshift_database_name}}"},
+      {"key": "username", "stringValue": "{{redshift_username}}"},
+      {"key": "*password", "stringValue": "{{redshift_password}}"},
+      {"key": "type", "stringValue": "RedshiftDatabase"},
+      {"key": "connectionString", "stringValue": "jdbc:postgresql://{{redshift_url}}:5439/{{redshift_database_name}}"}],
+    "id": "RedshiftDatabaseId1",
+    "name": "RedshiftCluster"
+  },
+  {"fields": [
+      {"key": "scheduleType", "stringValue": "cron"},
+      {"key": "failureAndRerunMode", "stringValue": "cascade"},
+      {"key": "role", "stringValue": "{{redshift_pipeline_role}}"},
+      {"key": "resourceRole", "stringValue": "{{redshift_pipeline_resource_role}}"},
+      {"key": "schedule", "refValue": "ScheduleId1"},
+      {"key": "scheduleType", "stringValue": "cron"}],
+    "id": "Defaultschedule",
+    "name": "Default"
+  },
+  {"fields": [
+      {"key": "schedule", "refValue": "ScheduleId1"},
+      {"key": "tableName", "stringValue": "imageproccessingtable"},
+      {"key": "createTableSql", "stringValue": "create table if not exists imageproccessingtable(url varchar(200) NOT NULL,dateoriginal timestamp NOT NULL,gpslatitude float NOT NULL,gpslongitude float NOT NULL,image varchar(100));"},
+      {"key": "type", "stringValue": "RedshiftDataNode"},
+      {"key": "database", "refValue": "RedshiftDatabaseId1"},
+      {"key": "scheduleType", "stringValue": "cron"}],
+    "id": "RedshiftDataNodeId1",
+    "name": "DestRedshiftTable"
+  },
+  {"fields": [
+      {"key": "schedule", "refValue": "ScheduleId1"},
+      {"key": "securityGroups", "stringValue": "default"},
+      {"key": "role", "stringValue": "{{redshift_pipeline_role}}"},
+      {"key": "logUri", "stringValue": "s3://{{app_name}}-shoppertrak-test6-logs/"},
+      {"key": "resourceRole", "stringValue": "{{redshift_pipeline_resource_role}}"},
+      {"key": "type", "stringValue": "Ec2Resource"},
+      {"key": "scheduleType", "stringValue": "cron"}],
+    "id": "Ec2ResourceId1",
+    "name": "EC2Instance"
+  },
+  {"fields": [
+      {"key": "type", "stringValue": "Schedule"},
+      {"key": "period", "stringValue": "1 Hour"},
+      {"key": "startAt", "stringValue": "FIRST_ACTIVATION_DATE_TIME"},
+      {"key": "endDateTime", "stringValue": "2016-04-08T23:00:00"}],
+    "id": "ScheduleId1",
+    "name": "RunOnce"
+  },
+  {"fields": [
+      {"key": "schedule", "refValue": "ScheduleId1"},
+      {"key": "filePath", "stringValue": "s3://bucket-{{app_name}}-test6-shoppertrak/metadata/"},
+      {"key": "type", "stringValue": "S3DataNode"},
+      {"key": "scheduleType", "stringValue": "cron"}],
+    "id": "S3DataNodeId1",
+    "name": "DefaultS3DataNode1"
+  },
+  {"fields": [
+
+      {"key": "input", "refValue": "S3DataNodeId1"},
+      {"key": "schedule", "refValue": "ScheduleId1"},
+      {"key": "insertMode", "stringValue": "TRUNCATE"},
+      {"key": "runsOn", "refValue": "Ec2ResourceId1"},
+      {"key": "type", "stringValue": "RedshiftCopyActivity"},
+      {"key": "output", "refValue": "RedshiftDataNodeId1"},
+      {"key": "commandOptions", "stringValue": "json 'auto'"},
+      {"key": "scheduleType", "stringValue": "cron"}],
+    "id": "RedshiftCopyActivityId1",
+    "name": "RedshiftLoadActivity"
+  }
+]

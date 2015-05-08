@@ -1,0 +1,68 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create an S3 Bucket for storing images and metadata",
+    "Resources": {
+		"PipelineBucket" : {
+		    "Type" : "AWS::S3::Bucket",
+		    "Metadata" : {
+		    	"DocString" :
+				   "S3 Bucket used by Pipeline Demo to store images and metadata."
+		    },
+		    "Properties" : {
+				"BucketName" : "{{bucket_name}}",
+				"Tags": [
+				    { "Key": "Name", "Value": "{{bucket_name}}" },
+				    { "Key": "NucleatorGroup", "Value": "PipelineDemo" },
+				    {{ nucleator_common_tags | to_json_fragment }}
+				]
+		    }
+		},
+		"PipelineBucketPolicy" : {
+		    "Type" : "AWS::S3::BucketPolicy",
+		    "Metadata" : { "DocString" :
+				   "Policy that permits workers to add files to the bucket" },
+		    "Properties" : {
+			"Bucket" : {
+			    "Ref": "PipelineBucket"
+			},
+			"PolicyDocument": {
+			    "Version": "2008-10-17",
+			    "Id": "PipelineBucketPolicy-{{app_name}}",
+			    "Statement": [
+				{
+				    "Sid": "AwsGet-{{bucket_name}}",
+				    "Effect": "Allow",
+				    "Principal": {
+				    "AWS": "arn:aws:iam::{{ aws_accounts[cage_names[cage_name]['account']]['account_number'] }}:role/NucleatorBeanstalkServiceRunner"
+
+				    },
+				    "Action": [
+						"s3:GetObject"
+				    ],
+				    "Resource": "arn:aws:s3:::{{bucket_name}}/*"
+				},
+				{
+				    "Sid": "AwsPut-{{bucket_name}}",
+				    "Effect": "Allow",
+				    "Principal": {
+						"AWS": "arn:aws:iam::{{ aws_accounts[cage_names[cage_name]['account']]['account_number'] }}:user/NucleatorUser"
+				    },
+				    "Action": [
+						"s3:PutObject"
+				    ],
+				    "Resource": "arn:aws:s3:::{{bucket_name}}/*"
+				}
+			    ]
+			}
+		    }
+		}
+	},
+    "Outputs": {
+        "PipelineBucketName": {
+		    "Description": "Name of the S3 bucket used by Nucleator Pipeline Demo",
+		    "Value": {
+				"Ref": "PipelineBucket"
+		    }
+		}
+    }
+}

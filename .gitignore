@@ -1,0 +1,6 @@
+**/*.zip
+*.pyc
+.elasticbeanstalk/
+release/
+.idea
+**/node_modules

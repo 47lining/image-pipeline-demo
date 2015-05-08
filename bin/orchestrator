@@ -1,0 +1,8 @@
+#!/bin/bash
+cd ~/.nucleator/contrib/bucketandq/orchestrator/
+queue_name=$1
+if .$queue_name == .; do
+	echo "Enter the queue name: "
+	read queue_name
+fi
+AWS_ACCESS_KEY_ID="" AWS_SECRET_ACCESS_KEY="+" python orchestrate.py $queue_name
