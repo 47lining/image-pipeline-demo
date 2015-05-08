@@ -1,0 +1,126 @@
+{ "specification": [
+{
+	"product_codes": [
+		{
+			"url": "https://www.apple.com/iphone-6/",
+			"pct": 30
+		},
+		{
+			"url": "https://www.apple.com/watch/",
+			"pct": 10
+		},
+		{
+			"url": "https://www.apple.com/ipad-air-2/",
+			"pct": 50
+		},
+		{
+			"url": "https://www.apple.com/macbook-pro/",
+			"pct": 10
+		}
+	],
+	"geolocations": [
+	  {
+		"pct": 50,
+	    "longitude": -87.2169149,
+	    "latitude": 30.421309
+	  },
+	  {
+		"pct": 40,
+	    "longitude": -86.618842,
+	    "latitude": 30.4057552
+	  },
+	  {
+		"pct": 5,
+	    "longitude": -86.2999689,
+	    "latitude": 32.3668052
+	  },
+	  {
+		"pct": 5,
+	    "longitude": -87.0211007,
+	    "latitude": 32.4073589
+	  }
+	],
+	"time_function": [
+		{
+			"pct": 10,
+			"date_spec":
+			{
+				"year": "eq(2013)",
+				"month": "in(1,4)"
+			}
+		},
+		{
+			"pct": 15,
+			"date_spec":
+			{
+				"year": "eq(2013)",
+				"month": "in(5,8)"
+			}
+		},
+		{
+			"pct": 20,
+			"date_spec":
+			{
+				"year": "eq(2013)",
+				"month": "in(9,12)"
+			}
+		},
+		{
+			"pct": 25,
+			"date_spec":
+			{
+				"year": "eq(2014)"
+			}
+		},
+		{
+			"pct": 30,
+			"date_spec":
+			{
+				"year": "eq(2015)"
+			}
+		}
+	],
+	"hour_distribution": [
+	{
+		"pct": 10,
+		"hour": 8
+	},
+	{
+		"pct": 10,
+		"hour": 9
+	},
+	{
+		"pct": 10,
+		"hour": 10
+	},
+	{
+		"pct": 10,
+		"hour": 11
+	},
+	{
+		"pct": 10,
+		"hour": 12
+	},
+	{
+		"pct": 10,
+		"hour": 13
+	},
+	{
+		"pct": 10,
+		"hour": 14
+	},
+	{
+		"pct": 10,
+		"hour": 15
+	},
+	{
+		"pct": 10,
+		"hour": 16
+	},
+	{
+		"pct": 10,
+		"hour": 17
+	}
+	]
+}
+]}

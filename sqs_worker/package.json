@@ -1,0 +1,34 @@
+{
+  "name": "sqs_worker",
+  "version": "1.0.0",
+  "description": "An Elastic Beanstalk worker tier application that reads an SQS queue",
+  "private": true,
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://mchance@stash.47lining.com/scm/lin/image-pipeline-demo.git"
+  },
+  "keywords": [
+    "SQS",
+    "EB",
+    "Worker"
+  ],
+  "author": "Mark Chance",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "mocha": "^1.21.5",
+    "should": "^4.0.4"
+  },
+  "dependencies": {
+    "node-gyp": "1.0.3",
+    "aws-sdk": "2.1.18",
+    "bufs": "0.0.x",
+    "canvas": "1.2.1",
+    "jsqrcode": "0.0.6",
+    "gm": "1.17.0"
+  }
+}

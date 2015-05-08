@@ -1,0 +1,57 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create an SQS queue for notifying the worker bees",
+    "Resources": {
+		"PipelineQueue" : {
+		    "Type" : "AWS::SQS::Queue",
+		    "Properties" : {
+		        "VisibilityTimeout" : 300,
+		        "QueueName": "{{queue_name}}"
+		    }
+		},
+		"PipelineQueuePolicy" : {
+		    "Type" : "AWS::SQS::QueuePolicy",
+		    "Metadata" : { 
+		    	"DocString" :
+				   "Policy that permits workers to add files to the bucket"
+			},
+		    "Properties" : {
+				"Queues" : 
+					[ {"Ref": "PipelineQueue"} ],
+				"PolicyDocument": {
+			    	"Version": "2008-10-17",
+			    	"Id": "PipelineQueuePolicy-{{app_name}}",
+				    "Statement": [
+					{
+					    "Sid": "SqsGet-{{app_name}}",
+					    "Effect": "Allow",
+					    "Principal": {
+				            "AWS": "*"
+					    },
+					    "Action": "sqs:*",
+					    "Resource":"arn:aws:sqs:*:*:{{queue_name}}",
+					    "Condition": {
+					        "ArnLike": {
+					            "aws:SourceArn": "arn:aws:s3:*:*:{{bucket_name}}"
+					        }
+					    }
+					}
+					]
+				}
+		    }
+		}
+	},
+    "Outputs": {
+        "PipelineQueueName": {
+		    "Description": "Name of the SQS queue used by Nucleator Pipeline Demo",
+		    "Value": {
+				"Ref": "PipelineQueue"
+		    }
+		},
+		"PipelineQueueArn": {
+			"Value": {
+				"Fn::GetAtt" : [ "PipelineQueue", "Arn" ]
+			}
+		}
+    }
+}

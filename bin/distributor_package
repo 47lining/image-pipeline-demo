@@ -1,0 +1,3 @@
+#!/bin/bash
+cd ~/.nucleator/contrib/bucketandq/distributor
+zip ../distributor.zip qrcode_generator.py application.py requirements.txt specification.json storyspecification.py .ebextensions/packages.config
