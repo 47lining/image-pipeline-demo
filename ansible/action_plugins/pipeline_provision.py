@@ -28,7 +28,7 @@ class ActionModule(object):
 			app_name = args["app_name"]
 			account_name = args["account_name"]
 			pipeline_resource_role = args["pipeline_resource_role"]
-
+			region = args["region"]
 			pipeline_template = args["pipeline_template"]
 
 			pipeline_name = "%s-%s-DataPipeline" % (app_name, account_name)
@@ -46,11 +46,15 @@ class ActionModule(object):
 			
 			try:
 				c.get_instance_profile(pipeline_resource_role)
+				c.remove_role_from_instance_profile(pipeline_resource_role, pipeline_resource_role)
+				c.delete_instance_profile(pipeline_resource_role)
+				c.create_instance_profile(pipeline_resource_role)
+				c.add_role_to_instance_profile(pipeline_resource_role,pipeline_resource_role)
 			except Exception, e:
 				c.create_instance_profile(pipeline_resource_role)
 				c.add_role_to_instance_profile(pipeline_resource_role,pipeline_resource_role)
 
-			connection = layer1.DataPipelineConnection(aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
+			connection = datapipeline.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
                     aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"),
                     security_token=env.get("AWS_SECURITY_TOKEN"))
 
