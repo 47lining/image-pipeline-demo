@@ -10,6 +10,10 @@
 		    },
 		    "Properties" : {
 				"BucketName" : "{{bucket_name}}",
+				"LoggingConfiguration": { 
+					"DestinationBucketName": "{{nucleator_logging_bucketname_specification}}",
+					"LogFilePrefix": "BucketandQBucket/"
+				},
 				"Tags": [
 				    { "Key": "Name", "Value": "{{bucket_name}}" },
 				    { "Key": "NucleatorGroup", "Value": "PipelineDemo" },
