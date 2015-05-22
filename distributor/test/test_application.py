@@ -12,34 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
+import datetime
 
 sys.path.insert(0,'..')
+import application as APP
 from storyspecification import StorySpecification
 
-input_array = [
-		{
-			"url": "https://www.apple.com/iphone-6/",
-			"pct": 30
-		},
-		{
-			"url": "https://www.apple.com/watch/",
-			"pct": 10
-		},
-		{
-			"url": "https://www.apple.com/ipad-air-2/",
-			"pct": 50
-		},
-		{
-			"url": "https://www.apple.com/macbook-pro/",
-			"pct": 10
-		}
-]
+storyspecification = StorySpecification(spec_file="../specification.json")
+record = storyspecification.create_record("2015-01-01 13:59:59")
 
-product_codes = StorySpecification.build_table(input_array)
-# for i in range(len(product_codes)):
-	# print "PC "+str(i)+": "+str(product_codes[i])+": "+str(input_array[i])
+print "Product url: "+record["product_url"]
+print "Date time: "+record["date_time"]
+print "latitude: "+str(record["latitude"])
+print "longitude: "+str(record["longitude"])
 
-for i in range(1000):
-	# import pdb; pdb.set_trace()
-	pc = StorySpecification.find_entry(input_array, product_codes)
-	print pc['url']
+APP.writeAnImage(record)

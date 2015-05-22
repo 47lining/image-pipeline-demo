@@ -1,0 +1,37 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.0",
+      "eventSource": "aws:s3",
+      "awsRegion": "us-west-2",
+      "eventTime": "2015-05-22T15:32:54.838Z",
+      "eventName": "ObjectCreated:Put",
+      "userIdentity": {
+        "principalId": "AWS:AIDAJQULG4WG7WMOOT4P6"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "73.14.175.150"
+      },
+      "responseElements": {
+        "x-amz-request-id": "D0F20EB0FB060372",
+        "x-amz-id-2": "\/\/0f35K+C+QKhgEVscz3bVfUexj9uY8o46WIBooIDc5Y5WyrfBvLYzLWZ6X1Y4eTvd6zT2VvJHQ="
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "BucketPut",
+        "bucket": {
+          "name": "imageproc-test1",
+          "ownerIdentity": {
+            "principalId": "AR6S9OMB6DGSQ"
+          },
+          "arn": "arn:aws:s3:::imageproc-test1"
+        },
+        "object": {
+          "key": "2015-01-01+22%3A59%3A59\/QRImage1.jpg",
+          "size": 18467,
+          "eTag": "deaf091bda47ffb018e7fe3815b66250"
+        }
+      }
+    }
+  ]
+}

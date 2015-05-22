@@ -1,3 +1,16 @@
+# Copyright 2015 47Lining LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import json, re, logging
 from random import randint
 from datetime import datetime, timedelta
@@ -98,7 +111,7 @@ class StorySpecification(object):
     			pct = entry['pct']
     			val = randint(1, 100)
     			return val <= pct
-        raise ValueError("No date match for "+date.strftime("%Y-%m-%d %H:%M:%S")) 
+        raise ValueError("No date match for "+date.strftime("%Y-%m-%d %H:%M:%S"))
 
     def generate_record(self, date_str):
         date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
@@ -110,7 +123,7 @@ class StorySpecification(object):
         location = StorySpecification.find_entry(self.geocodes, self.geocode_table)
         hour = StorySpecification.find_entry(self.hour_distribution, self.hour_table)
         date = date + timedelta(hours=hour['hour'])
-        return { 
+        return {
             "product_url": product_url['url'],
             "date_time": date.strftime("%Y-%m-%d %H:%M:%S"),
             "latitude": location['latitude'],
