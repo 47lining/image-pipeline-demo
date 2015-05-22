@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging, json, boto, flask, os
+import logging, json, boto, flask, os, hashlib
 from flask import request, Response
 from storyspecification import StorySpecification
 
@@ -43,20 +43,25 @@ handler.setFormatter(formatter)
 
 # add Handler to Logger
 logger.addHandler(handler)
-image_number = 0
 bucket_name = os.environ["S3_BUCKET_NAME"]
 
 storySpec = StorySpecification()
 
 def makeImageName(record):
     # Output a string based on stuff
-    global image_number
-    image_number = image_number + 1
-    return "QRImage"+str(image_number)+".jpg"
+    hash = hashlib.sha1("mymessage".encode("UTF-8")).hexdigest()
+    return "QRImage-"+hash[:10]+".jpg"
 
 def makeBucketKey(record):
     # Output a string based on stuff
-    return record["date_time"]
+    key = record["date_time"]
+    # put a random string at the beginning
+    # remove ':' and ' '
+    key = key.replace(':', '')
+    key = key.replace(' ', '')
+    hash = hashlib.sha1("mymessage".encode("UTF-8")).hexdigest()
+    key = hash[:4] + '-' + key
+    return key
 
 def writeAnImage(record):
     global bucket_name
@@ -64,7 +69,9 @@ def writeAnImage(record):
     image_file_name = makeImageName(record)
     QR.create_local_image_file(image_file_name, record["product_url"], record["latitude"],
         record["longitude"], record["date_time"], tmpimagefolder+"/")
-    QR.upload_file_to_s3(bucket_name, makeBucketKey(record), image_file_name, tmpimagefolder+"/")
+    key = makeBucketKey(record)
+    # print "aws s3 cp "+tmpimagefolder+"/"+image_file_name+" s3://"+bucket_name+"/"+key+"/"+image_file_name
+    QR.upload_file_to_s3(bucket_name, key, image_file_name, tmpimagefolder+"/")
 
 def handleMessage(message):
     if "date" in message:
