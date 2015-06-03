@@ -64,7 +64,10 @@ class ActionModule(object):
 				c.create_instance_profile(pipeline_resource_role)
 				c.add_role_to_instance_profile(pipeline_resource_role,pipeline_resource_role)
 			except Exception, e:
-				c.create_instance_profile(pipeline_resource_role)
+				try:
+					c.create_instance_profile(pipeline_resource_role)
+				except Exception, e:
+					pass
 				c.add_role_to_instance_profile(pipeline_resource_role,pipeline_resource_role)
 
 			connection = datapipeline.connect_to_region(region, aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"),
