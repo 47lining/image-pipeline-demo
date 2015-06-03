@@ -12,34 +12,52 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-cd ~/.nucleator/contrib/bucketandq/sqs_worker/
-sh ../bin/worker_package
-
-app_url="file://$HOME/.nucleator/contrib/bucketandq/sqs_worker.zip"
 
 echo "Enter the customer name: "
 read customer
+echo "Enter the account name: "
+read account_name
 echo "Enter the cage name: "
 read cage
-echo "Enter the app_name for the stacksets: "
-read app_name
+echo "Enter the app name for the worker stackset: "
+read worker_name
+echo "Enter the app name for the distributor stackset: "
+read distributor_name
+echo "Enter the app version for the beanstalk stacksets: "
+read app_version
 echo "Enter the username for the redshift cluster: "
 read username
 echo "Enter the password for the redshift cluster: "
 read password
-echo "Enter the app version for the beanstalk stackset: "
-read app_version
 
-nucleator redshift provision --customer $customer --cage $cage --cluster_name $app_name --username $username --password $password --public true
+sed -e "s/Replace_Queue_Bucket_Name/bucket-${worker_name}-${account_name}-${customer}/g" ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/packages.config > ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/temppackages.config
 
-echo "Enter the $app_name redshift endpoint url from the aws console: "
+cd ~/.nucleator/contrib/bucketandq/sqs_worker/
+sh ../bin/worker_package
+
+sh ~/.nucleator/contrib/bucketandq/bin/distributor_package
+
+worker_url="file://$HOME/.nucleator/contrib/bucketandq/sqs_worker.zip"
+distributor_url="file://$HOME/.nucleator/contrib/bucketandq/distributor.zip"
+
+nucleator redshift provision --customer $customer --cage $cage --cluster_name $worker_name --username $username --password $password --public true
+
+echo "Enter the $worker_name redshift endpoint url from the aws console: "
 read redshift_url
 
-nucleator bucketandq provision --customer $customer --cage $cage --app_name $app_name --redshift_username $username --redshift_password $password --redshift_url $redshift_url
+nucleator bucketandq provision --customer $customer --cage $cage --app_name $worker_name --redshift_username $username --redshift_password $password --redshift_url $redshift_url
 
-echo "Enter the $app_name sqs url from the aws console: "
+echo "Enter the $worker_name sqs url from the aws console: "
 read queue_url
+echo "Enter the SQS Worker Service Runner role name from the aws console: "
+read sqsworkerrolename
+echo "Enter the Distributor Service Runner role name from the aws console: "
+read distributorrolename
 
-nucleator beanstalk provision --customer $customer --cage $cage --type nodejs --tier worker --app_name $app_name --queue_url $queue_url
-nucleator beanstalk configure --customer $customer --cage $cage
-nucleator beanstalk deploy --customer $customer --cage $cage --app_name $app_name --app_version $app_version --app_url $app_url
+nucleator beanstalk provision --customer $customer --cage $cage --type nodejs --tier worker --app_name $worker_name --queue_url $queue_url --service_role $sqsworkerrolename
+nucleator beanstalk configure --customer $customer --cage $cage --app_name $worker_name
+nucleator beanstalk deploy --customer $customer --cage $cage --app_name $worker_name --app_version $app_version --app_url $worker_url
+
+nucleator beanstalk provision --customer $customer --cage $cage --type python --tier worker --app_name $distributor_name --service_role $distributorrolename --beanstalk_instance_type t2.small
+nucleator beanstalk configure --customer $customer --cage $cage --app_name $distributor_name
+nucleator beanstalk deploy --customer $customer --cage $cage --app_name $distributor_name --app_version $app_version --app_url $distributor_url

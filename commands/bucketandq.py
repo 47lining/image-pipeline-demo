@@ -57,6 +57,33 @@ class BucketAndQ(Command):
             **extra_vars
         )
 
+    def orchestrate(self, **kwargs):
+        """
+        Provisions an S3 bucket and an SQS queue within specified Account for specified Customer.
+        """
+        cli = Command.get_cli(kwargs)
+        queue_name = kwargs.get("queue_name", None)
+        cage = kwargs.get("cage", None)
+        customer = kwargs.get("customer", None)
+        
+        extra_vars={
+            "cage_name": cage,
+            "customer_name": customer,
+            "queue_name": queue_name,
+            "verbosity": kwargs.get("verbosity", None),
+        }
+        
+        playbook = "orchestrate.yml"
+
+        command_list = []
+        command_list.append("bucketandq")
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None))
+        
+        return cli.safe_playbook(self.get_command_playbook(playbook),
+            is_static=True, # do not use dynamic inventory script, credentials may not be available
+            **extra_vars
+        )
+
     def parser_init(self, subparsers):
         """
         Initialize parsers for this command.
@@ -73,5 +100,10 @@ class BucketAndQ(Command):
         beanstalk_provision.add_argument("--redshift_url", required=True, help="The stackset url of the redshift cluster")
         beanstalk_provision.add_argument("--redshift_database_name", required=False, help="The database name used to provision the redshift cluster")
 
+        orchestrator=setup_subparsers.add_parser('orchestrate', help="Runs the orchestrator to start producing qrcode images")
+        orchestrator.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
+        orchestrator.add_argument("--cage", required=True, help="Name of cage from nucleator config")
+        orchestrator.add_argument("--queue_name", required=True, help="Name of the sqs queue to push messages to")
+        
 # Create the singleton for auto-discovery
 command = BucketAndQ()

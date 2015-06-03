@@ -4,3 +4,4 @@
 release/
 .idea
 **/node_modules
+distributor/.ebextensions/temppackages.config

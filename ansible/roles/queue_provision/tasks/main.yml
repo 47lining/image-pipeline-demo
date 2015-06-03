@@ -25,7 +25,7 @@
     - "{{aws_environment_with_rolenames}}"
   no_log: True
 
-- name: "provision queue via cloudformation"
+- name: "provision queue and service roles via cloudformation"
   connection: local
   cloudformation:
     stack_name="{{ queue_name }}"

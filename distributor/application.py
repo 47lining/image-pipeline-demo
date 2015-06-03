@@ -70,8 +70,9 @@ def writeAnImage(record):
     QR.create_local_image_file(image_file_name, record["product_url"], record["latitude"],
         record["longitude"], record["date_time"], tmpimagefolder+"/")
     key = makeBucketKey(record)
+    s3_location = "qrimages/" + key
     # print "aws s3 cp "+tmpimagefolder+"/"+image_file_name+" s3://"+bucket_name+"/"+key+"/"+image_file_name
-    QR.upload_file_to_s3(bucket_name, key, image_file_name, tmpimagefolder+"/")
+    QR.upload_file_to_s3(bucket_name, s3_location, image_file_name, tmpimagefolder+"/")
 
 def handleMessage(message):
     if "date" in message:
