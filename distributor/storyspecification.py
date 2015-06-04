@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json, re, logging
-from random import randint
+from random import uniform
 from datetime import datetime, timedelta
 
 class StorySpecification(object):
@@ -106,11 +106,11 @@ class StorySpecification(object):
 
     @staticmethod
     def find_date_match(date, entries):
-    	for entry in entries:
-    		if StorySpecification.date_match(date, entry['date_spec']):
-    			pct = entry['pct']
-    			val = randint(1, 100)
-    			return val <= pct
+        for entry in entries:
+            if StorySpecification.date_match(date, entry['date_spec']):
+                pct = entry['pct']
+                val = uniform(0.0, 100.0)
+                return val <= pct
         raise ValueError("No date match for "+date.strftime("%Y-%m-%d %H:%M:%S"))
 
     def generate_record(self, date_str):
