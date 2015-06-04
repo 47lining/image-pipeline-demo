@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json, re, logging
-from random import uniform
+from random import uniform, randint
 from datetime import datetime, timedelta
 
 class StorySpecification(object):
