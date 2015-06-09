@@ -1,0 +1,52 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create a DynamoDB table",
+    "Resources": {
+		"DynamoDatabase" : {
+            "Type" : "AWS::DynamoDB::Table",
+            "Properties" : {
+                "AttributeDefinitions" : [
+                  {
+                    "AttributeName" : "dateoriginal",
+                    "AttributeType" : "S"   
+                  },
+                  {
+                    "AttributeName" : "url",
+                    "AttributeType" : "S"
+                  },
+                  {
+                    "AttributeName" : "gpslatitude",
+                    "AttributeType" : "S"
+                  },
+                  {
+                    "AttributeName" : "gpslongitude",
+                    "AttributeType" : "S"
+                  },
+                  {
+                    "AttributeName" : "image",
+                    "AttributeType" : "S"
+                  }
+                ],
+                "KeySchema" : [
+                  {
+                    "AttributeName" : "dateoriginal",
+                    "KeyType" : "HASH"
+                  }
+                ],
+                "ProvisionedThroughput" : {
+                  "ReadCapacityUnits" : "5",
+                  "WriteCapacityUnits" : "5"
+                },
+                "TableName" : "imagemetadata"
+            }
+       }
+    },
+    "Outputs": {
+        "DynamoDatabase": {
+		    "Description": "Name of the Dynamo database",
+		    "Value": {
+				"Ref": "DynamoDatabase"
+		    }
+		}
+	}
+}

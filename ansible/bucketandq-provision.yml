@@ -27,6 +27,7 @@
     - bucket_provision
     - pipeline_provision
     - cname_provision
+    - dynamo_provision
 
   vars:
     cli_stackset_name: bucketandq

@@ -73,6 +73,11 @@ role_specification:
                 - "route53:GetHostedZone"
                 - "route53:ChangeResourceRecordSets"
               Resource: '*'
+            - Effect: Allow
+              Action:
+                - "dynamodb:DescribeTable"
+                - "dynamodb:CreateTable"
+              Resource: '*'
   - role_name: NucleatorPipelineProvisioner
     trust_policy:
       Version : "2008-10-17"
