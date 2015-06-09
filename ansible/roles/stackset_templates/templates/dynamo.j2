@@ -9,30 +9,13 @@
                   {
                     "AttributeName" : "dateoriginal",
                     "AttributeType" : "S"   
-                  },
-                  {
-                    "AttributeName" : "url",
-                    "AttributeType" : "S"
-                  },
-                  {
-                    "AttributeName" : "gpslatitude",
-                    "AttributeType" : "S"
-                  },
-                  {
-                    "AttributeName" : "gpslongitude",
-                    "AttributeType" : "S"
-                  },
-                  {
-                    "AttributeName" : "image",
-                    "AttributeType" : "S"
                   }
                 ],
-                "KeySchema" : [
+                "KeySchema" :
                   {
                     "AttributeName" : "dateoriginal",
                     "KeyType" : "HASH"
-                  }
-                ],
+                  },
                 "ProvisionedThroughput" : {
                   "ReadCapacityUnits" : "5",
                   "WriteCapacityUnits" : "5"
@@ -43,10 +26,10 @@
     },
     "Outputs": {
         "DynamoDatabase": {
-		    "Description": "Name of the Dynamo database",
-		    "Value": {
-				"Ref": "DynamoDatabase"
+		      "Description": "Name of the Dynamo database",
+		      "Value": {
+				    "Ref": "DynamoDatabase"
+		      }
 		    }
-		}
-	}
+	  }
 }
