@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://mchance@stash.47lining.com/scm/lin/image-pipeline-demo.git"
+    "url": "https://github.com/47lining/image-pipeline-demo.git"
   },
   "keywords": [
     "SQS",
@@ -29,6 +29,7 @@
     "bufs": "0.0.x",
     "canvas": "1.2.1",
     "jsqrcode": "0.0.6",
-    "gm": "1.17.0"
+    "gm": "1.17.0",
+    "dynamodb-doc": "1.0.0"
   }
 }

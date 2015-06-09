@@ -41,6 +41,7 @@ var
     http = require('http'),
     fs = require('fs'),
     AWS = require('aws-sdk'),
+    DOC = require("dynamodb-doc"),
     html = fs.readFileSync('index.html'),
     gm = require('gm'),
     Canvas = require('canvas'),
@@ -48,24 +49,40 @@ var
     qrcode = require('jsqrcode')(Canvas);
 
 var s3 = new AWS.S3();
+var ddb = new DOC.DynamoDB();
 
+function writeDatabase(output, res) {
+    ddb.putItem(
+        {"TableName": "image_metadata", "Item": output},
+        function(err,data) {
+            if (err) {
+                console.log(err, err.stack); // an error occurred
+                res.writeHead(500, 'Error writing record', {'Content-Type': 'text/plain'});
+            } else {
+                // console.log(data);
+                res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
+            }
+            res.end();
+        }
+    );
+}
 function writeFile(url, latitude, longitude, originalDate, bucket_name, filepath, res) {
     // filepath images/iphone_4s_pic.jpeg
     // replace file extension with "json"
     console.log(">>> writeFile: filepath: "+filepath);
 
+    var output = {
+        "dateoriginal": originalDate,
+        "url": url,
+        "gpslatitude": latitude,
+        "gpslongitude": longitude,
+        "image": filepath
+    };
     var dot = filepath.lastIndexOf(".");
     if (dot == -1) {
         jsonName = filepath+".json";
     } else {
         jsonName = filepath.substring(0, dot)+".json";
-    }
-    var output = {
-        "url": url,
-        "dateoriginal": originalDate,
-        "gpslatitude": latitude,
-        "gpslongitude": longitude,
-        "image": filepath
     }
     var params = {
         Bucket: bucket_name,
@@ -79,8 +96,9 @@ function writeFile(url, latitude, longitude, originalDate, bucket_name, filepath
         res.end();
     } else {
         // console.log(data);
-        res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
-        res.end();
+        writeDatabase(output, res);
+        // res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
+        // res.end();
     }
     });
 }
