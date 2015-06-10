@@ -58,7 +58,7 @@ var ddb = new DOC.DynamoDB();
 
 function writeDatabase(output, res) {
     ddb.putItem(
-        {"TableName": "image_metadata", "Item": output},
+        {"TableName": "imagemetadata", "Item": output},
         function(err,data) {
             if (err) {
                 console.log(err, err.stack); // an error occurred
