@@ -11,11 +11,12 @@
                     "AttributeType" : "S"   
                   }
                 ],
-                "KeySchema" :
+                "KeySchema" : [
                   {
                     "AttributeName" : "dateoriginal",
                     "KeyType" : "HASH"
-                  },
+                  }
+                ],
                 "ProvisionedThroughput" : {
                   "ReadCapacityUnits" : "5",
                   "WriteCapacityUnits" : "5"
