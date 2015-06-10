@@ -43,6 +43,7 @@ var
     AWS = require('aws-sdk'),
     DOC = require("dynamodb-doc"),
     html = fs.readFileSync('index.html'),
+    uuid=require('uuid'),
     gm = require('gm'),
     Canvas = require('canvas'),
     Image = Canvas.Image,
@@ -77,6 +78,7 @@ function writeFile(url, latitude, longitude, originalDate, bucket_name, filepath
     console.log(">>> writeFile: filepath: "+filepath);
 
     var output = {
+        "key": uuid.v4(),
         "dateoriginal": originalDate,
         "url": url,
         "gpslatitude": latitude,
