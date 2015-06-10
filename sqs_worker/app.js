@@ -49,6 +49,11 @@ var
     qrcode = require('jsqrcode')(Canvas);
 
 var s3 = new AWS.S3();
+AWS.config.update({region: process.env.AWS_REGION || "us-west-2"
+    // ,
+    // accessKeyId: '...',
+    // secretAccessKey: '...'
+});
 var ddb = new DOC.DynamoDB();
 
 function writeDatabase(output, res) {
