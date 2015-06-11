@@ -25,7 +25,6 @@
     - siteconfig
     - queue_provision
     - bucket_provision
-    - pipeline_provision
     - cname_provision
     - dynamo_provision
 
@@ -37,9 +36,6 @@
     app_name: "{{app_name}}"
     bucket_name: "{{app_name ~'-'~ cage_names[cage_name]['account'] ~'-'~ customer_name}}"
     queue_name: "{{app_name ~'-'~ cage_names[cage_name]['account'] ~'-'~ customer_name}}"
-    rs_username: "{{rs_username}}"
-    rs_password: "{{rs_password}}"
-    rs_dbname: "{{rs_dbname}}"
     rs_url: "{{rs_url}}"
     pipeline_resource_role: "NucleatorPipelineDefaultResourceRole"
     pipeline_role: "NucleatorPipelineDefaultRole"

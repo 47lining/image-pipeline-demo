@@ -32,17 +32,11 @@ class BucketAndQ(Command):
         if cage is None or customer is None:
             raise ValueError("cage and customer must be specified")
         app_name = kwargs.get("app_name", "pipeline")
-        redshift_db_name = kwargs.get("redshift_database_name", None)
-        if redshift_db_name is None:
-            redshift_db_name = "defaultdb"
         extra_vars={
             "cage_name": cage,
             "customer_name": customer,
             "app_name": app_name,
             "verbosity": kwargs.get("verbosity", None),
-            "rs_username": kwargs.get("redshift_username", None),
-            "rs_password": kwargs.get("redshift_password", None),
-            "rs_dbname": redshift_db_name,
             "rs_url": kwargs.get("redshift_url", None),
         }
         
@@ -95,10 +89,7 @@ class BucketAndQ(Command):
         beanstalk_provision.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")
         beanstalk_provision.add_argument("--cage", required=True, help="Name of cage from nucleator config")
         beanstalk_provision.add_argument("--app_name", required=True, help="Name of Application (will be used in bucket and queue names")
-        beanstalk_provision.add_argument("--redshift_username", required=True, help="The username used to provision the redshift cluster")
-        beanstalk_provision.add_argument("--redshift_password", required=True, help="The password used to provision the redshift cluster")
         beanstalk_provision.add_argument("--redshift_url", required=True, help="The stackset url of the redshift cluster")
-        beanstalk_provision.add_argument("--redshift_database_name", required=False, help="The database name used to provision the redshift cluster")
 
         orchestrator=setup_subparsers.add_parser('orchestrate', help="Runs the orchestrator to start producing qrcode images")
         orchestrator.add_argument("--customer", required=True, action=ValidateCustomerAction, help="Name of customer from nucleator config")

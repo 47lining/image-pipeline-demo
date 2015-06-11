@@ -45,7 +45,7 @@ nucleator redshift provision --customer $customer --cage $cage --cluster_name $w
 echo "Enter the $worker_name redshift endpoint url from the aws console: "
 read redshift_url
 
-nucleator bucketandq provision --customer $customer --cage $cage --app_name $worker_name --redshift_username $username --redshift_password $password --redshift_url $redshift_url
+nucleator bucketandq provision --customer $customer --cage $cage --app_name $worker_name --redshift_url $redshift_url
 
 echo "Enter the $worker_name sqs url from the aws console: "
 read queue_url

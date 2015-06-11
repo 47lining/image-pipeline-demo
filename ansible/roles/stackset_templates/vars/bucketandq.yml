@@ -15,10 +15,5 @@
 stackset_name: bucketandq
 bucket_name: "bucket-{{app_name ~'-'~ cage_names[cage_name]['account'] ~'-'~ customer_name}}"
 queue_name: "sqs-queue-{{app_name ~'-'~ cage_names[cage_name]['account'] ~'-'~ customer_name}}"
-redshift_username: "{{rs_username}}"
-redshift_password: "{{rs_password}}"
 redshift_url: "{{rs_url}}"
-redshift_database_name: "{{rs_dbname}}"
-redshift_pipeline_resource_role: "{{pipeline_resource_role}}"
-redshift_pipeline_role: "{{pipeline_role}}"
 app_name: "{{app_name}}"
