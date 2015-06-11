@@ -17,6 +17,7 @@ from flask import request, Response
 from storyspecification import StorySpecification
 
 import qrcode_generator as QR
+import random
 
 # Create and configure the Flask app
 application = flask.Flask(__name__)
@@ -50,7 +51,7 @@ storySpec = StorySpecification()
 def makeImageName(record):
     # Output a string based on stuff
     hash = hashlib.sha1("mymessage".encode("UTF-8")).hexdigest()
-    return "QRImage-"+hash[:10]+".jpg"
+    return "QRImage-"+str(random.uniform(0,10))+".jpg"
 
 def makeBucketKey(record):
     # Output a string based on stuff

@@ -83,6 +83,13 @@
 				            ],
 				            "Resource": "arn:aws:s3:::*",
 				            "Effect": "Allow"
+				        },
+				        {
+				            "Action": [
+				                "dynamodb:PutItem"
+				            ],
+				            "Resource": "arn:aws:dynamodb:*",
+				            "Effect": "Allow"
 				        }
 				      	]
 	           		}

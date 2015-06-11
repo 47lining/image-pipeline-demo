@@ -44,7 +44,7 @@ class StorySpecification(object):
     def find_entry(entries, percentages_array):
         if len(percentages_array) != len(entries):
             raise ValueError("percentages should match entries")
-        val = randint(1, 100)
+        val = uniform(1, 100)
         for i in range(0, len(percentages_array)):
             if val <= percentages_array[i]:
                 # print "Random no. is "+str(val)+", i is "+str(i)

@@ -54,7 +54,7 @@ read sqsworkerrolename
 echo "Enter the Distributor Service Runner role name from the aws console: "
 read distributorrolename
 
-nucleator beanstalk provision --customer $customer --cage $cage --type nodejs --tier worker --app_name $worker_name --queue_url $queue_url --service_role $sqsworkerrolename
+nucleator beanstalk provision --customer $customer --cage $cage --type nodejs --tier worker --app_name $worker_name --queue_url $queue_url --service_role $sqsworkerrolename --beanstalk_instance_type t2.small
 nucleator beanstalk configure --customer $customer --cage $cage --app_name $worker_name
 nucleator beanstalk deploy --customer $customer --cage $cage --app_name $worker_name --app_version $app_version --app_url $worker_url
 
