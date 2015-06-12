@@ -3,6 +3,29 @@ option_settings:
     resource_name: AWSEBInstanceLaunchWaitCondition
     option_name: Timeout
     value: 1800
+  - option_name: PORT
+    value: 3000
+  - option_name: DYN_TABLENAME
+    value: table-{{worker_name}}
+  - option_name: AWS_REGION
+    value: us-west-2
+  - option_name: RSDB_USERNAME
+    value: {{username}}
+  - option_name: RSDB_PASSWORD
+    value: {{password}}
+  - option_name: RSDB_DATABASE
+    value: defaultdb
+  - option_name: RSDB_PORT
+    value: 5439
+  - option_name: CUSTOMER
+    value: {{customer}}
+  - option_name: CAGE
+    value: {{cage}}
+  - option_name: APP_DEBUG
+    value: false
+  # if redshift is not redshift.<cage>.<customer>.47lining.com, set the host
+  # option_name: RSDB_HOST
+  # value: <something else>
 
 packages:
   yum:

@@ -21,7 +21,8 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "mocha": "^1.21.5",
-    "should": "^4.0.4"
+    "should": "^4.0.4",
+    "lodash": "3.9.3"
   },
   "dependencies": {
     "node-gyp": "1.0.3",
@@ -31,6 +32,10 @@
     "jsqrcode": "0.0.6",
     "gm": "1.17.0",
     "uuid": "2.0.1",
-    "dynamodb-doc": "1.0.0"
+    "dynamodb-doc": "1.0.0",
+    "vogels": "2.0.0-rc10",
+    "joi": "6.4.3",
+    "json": "9.0.3",
+    "pg": "4.4.0"
   }
 }

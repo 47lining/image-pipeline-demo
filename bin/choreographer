@@ -33,6 +33,7 @@ read password
 sed -e "s/Replace_Queue_Bucket_Name/bucket-${worker_name}-${account_name}-${customer}/g" ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/packages.config > ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/temppackages.config
 
 cd ~/.nucleator/contrib/bucketandq/sqs_worker/
+j2 -f env .ebextensions/packages.j2 > .ebextensions/packages.config
 sh ../bin/worker_package
 
 sh ~/.nucleator/contrib/bucketandq/bin/distributor_package

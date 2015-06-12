@@ -38,7 +38,10 @@
 // }
 var 
     port = process.env.PORT || 3000,
+    region = process.env.AWS_REGION || "us-west-2",
+    dyn_tablename = process.env.DYN_TABLENAME || "table-imageproc",
     http = require('http'),
+    rsCopy = require("./toRedshift"),
     fs = require('fs'),
     AWS = require('aws-sdk'),
     DOC = require("dynamodb-doc"),
@@ -47,19 +50,15 @@ var
     gm = require('gm'),
     Canvas = require('canvas'),
     Image = Canvas.Image,
-    qrcode = require('jsqrcode')(Canvas);
+    qrcode = require('jsqrcode')(Canvas),
+    s3 = new AWS.S3(),
+    ddb = new DOC.DynamoDB();
 
-var s3 = new AWS.S3();
-AWS.config.update({region: process.env.AWS_REGION || "us-west-2"
-    // ,
-    // accessKeyId: '...',
-    // secretAccessKey: '...'
-});
-var ddb = new DOC.DynamoDB();
+AWS.config.update({ region: region });
 
 function writeDatabase(output, res) {
     ddb.putItem(
-        {"TableName": "imagemetadata", "Item": output},
+        { "TableName": dyn_tablename, "Item": output},
         function(err,data) {
             if (err) {
                 console.log(err, err.stack); // an error occurred
@@ -279,6 +278,20 @@ var server = http.createServer(function (req, res) {
             if (req.url === '/') {
                 console.log('Received message: ' + body);
                 handleMessage(body, res);
+            } else if (req.url === '/dyn2red') {
+                console.log('Received dyn2red message: ' + body);
+                rsCopy.copyToRedshift(region, dyn_tablename, body,
+                    function(err,data) {
+                        if (err) {
+                            console.log(err, err.stack); // an error occurred
+                            res.writeHead(500, 'Error writing record', {'Content-Type': 'text/plain'});
+                        } else {
+                            // console.log(data);
+                            res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
+                        }
+                        res.end();
+                    }
+                );
             } else if (req.url === '/heartbeat') {
                 res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
                 res.end();
