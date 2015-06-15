@@ -15,20 +15,28 @@
 
 echo "Enter the customer name: "
 read customer
+export customer
 echo "Enter the account name: "
 read account_name
+export account_name
 echo "Enter the cage name: "
 read cage
+export cage
 echo "Enter the app name for the worker stackset: "
 read worker_name
+export worker_name
 echo "Enter the app name for the distributor stackset: "
 read distributor_name
+export distributor_name
 echo "Enter the app version for the beanstalk stacksets: "
 read app_version
+export app_version
 echo "Enter the username for the redshift cluster: "
 read username
+export username
 echo "Enter the password for the redshift cluster: "
 read password
+export password
 
 sed -e "s/Replace_Queue_Bucket_Name/bucket-${worker_name}-${account_name}-${customer}/g" ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/packages.config > ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/temppackages.config
 
