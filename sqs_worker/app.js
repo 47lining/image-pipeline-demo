@@ -201,12 +201,12 @@ function processFile(bucket_name, filename, databody, res) {
             );
             } catch(e) {
                 console.log('unable to read metadata: '+typeof e);
-                res.writeHead(200, 'Unable to read metadata', {'Content-Type': 'text/plain'});
+                res.writeHead(500, 'Unable to read metadata', {'Content-Type': 'text/plain'});
                 res.end();
             }
         } catch(e) {
             console.log('unable to read qr code: '+e);
-            res.writeHead(200, 'Unable to read qr code', {'Content-Type': 'text/plain'});
+            res.writeHead(500, 'Unable to read qr code', {'Content-Type': 'text/plain'});
             res.end();
         }
     };
