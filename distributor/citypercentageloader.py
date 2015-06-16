@@ -12,8 +12,8 @@ for type in specification["specification"]:
 	for city in type["geolocations"]:
 		#print city
 
-		longcounter = (city["longitude"] + 160)/24 + 1
-		longcounter = 7.5 - longcounter
+		longcounter = ((city["longitude"] * -1) - 60)/9
+		#longcounter = 7.5 - longcounter
 		print longcounter
 
 		randomCounter = random.uniform(1, 10)
