@@ -241,7 +241,7 @@ function handleMessage(data, res) {
         for (var r in obj.Records) {
             // TODO >1 record in the message?
             record = obj.Records[r];
-            if (record.operation == 'copyToRedshift') {
+            if (record.operation != undefined && record.operation == 'copyToRedshift') {
                 console.log('Received dyn2red message: ' + body);
                 rsCopy.copyToRedshift(region, dyn_tablename, body,
                     function(err,data) {
@@ -256,7 +256,7 @@ function handleMessage(data, res) {
                     }
                 );
             }
-            else if (record.eventName.lastIndexOf("ObjectCreated:",0) != 0) {
+            else if (record.eventName == undefined || record.eventName.lastIndexOf("ObjectCreated:",0) != 0) {
                 // not a message we're interested in, but have daemon remove message
                 res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
                 res.end();
