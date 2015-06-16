@@ -205,8 +205,8 @@ function processFile(bucket_name, filename, databody, res) {
                 res.end();
             }
         } catch(e) {
-            console.log('unable to read qr code: '+e);
-            res.writeHead(500, 'Unable to read qr code', {'Content-Type': 'text/plain'});
+            console.log('unable to read qr code: '+e+', presumably not an image');
+            res.writeHead(200, 'Unable to read qr code', {'Content-Type': 'text/plain'});
             res.end();
         }
     };
