@@ -256,7 +256,7 @@ function handleMessage(data, res) {
                     }
                 );
             }
-            else if (record.eventName.startsWith("ObjectCreated:")) {
+            else if (record.eventName.lastIndexOf("ObjectCreated:",0) != 0) {
                 // not a message we're interested in, but have daemon remove message
                 res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
                 res.end();
