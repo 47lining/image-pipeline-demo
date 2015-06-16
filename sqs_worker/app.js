@@ -241,7 +241,22 @@ function handleMessage(data, res) {
         for (var r in obj.Records) {
             // TODO >1 record in the message?
             record = obj.Records[r];
-            if (record.eventName !== "ObjectCreated:Put") {
+            if (record.operation == 'copyToRedshift') {
+                console.log('Received dyn2red message: ' + body);
+                rsCopy.copyToRedshift(region, dyn_tablename, body,
+                    function(err,data) {
+                        if (err) {
+                            console.log(err, err.stack); // an error occurred
+                            res.writeHead(500, 'Error writing record', {'Content-Type': 'text/plain'});
+                        } else {
+                            // console.log(data);
+                            res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
+                        }
+                        res.end();
+                    }
+                );
+            }
+            else if (record.eventName !== "ObjectCreated:Put") {
                 // not a message we're interested in, but have daemon remove message
                 res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
                 res.end();
