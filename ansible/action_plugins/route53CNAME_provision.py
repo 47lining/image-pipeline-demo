@@ -43,20 +43,23 @@ class ActionModule(object):
 				env = utils.safe_eval(env)
 
 			route53_conn = boto.connect_route53(aws_access_key_id=env.get("AWS_ACCESS_KEY_ID"), aws_secret_access_key=env.get("AWS_SECRET_ACCESS_KEY"), security_token=env.get("AWS_SECURITY_TOKEN"))
-			zones = route53_conn.get_hosted_zone_by_name("%s.%s.47lining.com" % (cage, customer))
-
+			domain_name = "%s.%s.47lining.com" % (cage, customer)
+			zones = route53_conn.get_hosted_zone_by_name(domain_name)
+			if not zones:
+				domain_name = "%s.%s.com" % (cage, customer)
+				zones = route53_conn.get_hosted_zone_by_name(domain_name)
 			zone_id = zones["GetHostedZoneResponse"]["HostedZone"]["Id"]
 			zone_id = zone_id[12:]
 
 			recordset = ResourceRecordSets(route53_conn, zone_id)
 
 			try:
-				change = recordset.add_change("UPSERT", "redshift.%s.%s.47lining.com" % (cage, customer), "CNAME")
+				change = recordset.add_change("UPSERT", "redshift.%s." % domain_name, "CNAME")
 				change.add_value(redshift_endpoint)
 				recordset.commit()
 			except Exception, e:
 				print "e: ", e
-				change = recordset.add_change("CREATE", "redshift.%s.%s.47lining.com" % (cage, customer), "CNAME")
+				change = recordset.add_change("CREATE", "redshift.%s." % domain_name, "CNAME")
 				change.add_value(redshift_endpoint)
 				recordset.commit()
 				
