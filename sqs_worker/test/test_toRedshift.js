@@ -2,10 +2,11 @@ var
 	AWS = require('aws-sdk'),
 	util = require('util'),
 	rsCopy = require("../toRedshift");
+	_      = require('lodash');
 
-var
- util   = require('util'),
- _      = require('lodash');
+var 
+    region = process.env.AWS_REGION || "us-west-2",
+    dyn_tablename = process.env.DYN_TABLENAME || "table-imageproc",
 
 var printResults = function (err, resp) {
   console.log('----------------------------------------------------------------------');
@@ -16,4 +17,6 @@ var printResults = function (err, resp) {
   console.log('----------------------------------------------------------------------');
 };
 
-rsCopy.copyToRedshift("us-west-2", "table-imageproc", "", printResults);
+rsCopy.copyDynamoToRedshiftViaS3(region, dyn_tablename, "", printResults);
+
+rsCopy.copyDynamoToRedshift(region, dyn_tablename, "", printResults);

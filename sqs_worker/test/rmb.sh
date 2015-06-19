@@ -1,0 +1,14 @@
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-747286e9-f1f9-4e9b-af06-a8e75a240d18
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-7909cfd7-9394-484b-a711-d25cafd6a546
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-a9fb2ce6-5285-4bfe-a487-5f58695ca510
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-b415dd8d-f50b-4ce5-ae71-9cfbfb185c7d
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-b8cad8f5-c50c-45ba-824f-0ea9d71d847c
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-b952e21e-9206-4aba-b121-706d654ec711
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-bfc0e1a6-6878-40e8-a2bf-38f4f7a74203
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-ce79589b-e8d4-4339-a352-b990f80081f7
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-d3c1a5cd-24eb-4d90-84aa-9494d48dcbfd
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-e41adc61-8df0-4030-b61f-9632ed3e35b9
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-e9633dda-40a4-49f8-8ffb-a197e8285d59
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-eab9f9c5-635d-4025-930c-defa8e02fece
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-ebcc574e-ca9b-445b-8a35-14d961f616cd
+aws s3 --profile mchance-test1 rb --force s3://dynamo-archive-fb71fa07-dd66-4383-a8c7-4d0abb8a7538

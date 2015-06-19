@@ -57,7 +57,7 @@ var
 
 AWS.config.update({ region: region });
 
-function writeDatabase(output) {
+function writeDatabase(output, res) {
     if (output['key'] == undefined) {
         output['key'] = uuid.v4();
     }
@@ -78,38 +78,45 @@ function writeDatabase(output) {
 
 function Callback(response) {
     this.res = response;
-    this.std_callback = function(err, data) {
+    this.std_callback = (function(err, data) {
         if (err) {
             console.log(err, err.stack); // an error occurred
             this.res.writeHead(500, 'Error writing record', {'Content-Type': 'text/plain'});
+            this.res.end();
         } else {
             // console.log(data);
             if (err == undefined && typeof data == 'string') {
+                console.log("Finished no error: "+data);
                 this.res.writeHead(200, data, {'Content-Type': 'text/plain'});
+                this.res.end();
             } else {
-                writeDatabase(data);
+                writeDatabase(data, this.res);
             }
         }
-        this.res.end();
-    };
+    }).bind(this);
 }
 
 function handleMessage(data, res) {
     try {
         var obj = JSON.parse(data);
+        if (obj.operation != undefined && obj.operation == 'copyToS3Redshift') {
+            console.log('Received dyn2s3red message: ' + data);
+            cb = new Callback(res);
+            rsCopy.copyDynamoToRedshiftViaS3(region, dyn_tablename, data, cb.std_callback);
+            return;
+        }
+        else if (obj.operation != undefined && obj.operation == 'copyToRedshift') {
+            console.log('Received dyn2red message: ' + data);
+            cb = new Callback(res);
+            rsCopy.copyDynamoToRedshift(region, dyn_tablename, data, cb.std_callback);
+            return;
+        }
+
         console.log("Processing msg count: "+obj.Records.length)
         for (var r in obj.Records) {
             // TODO >1 record in the message?
             record = obj.Records[r];
-            if (record.operation != undefined && record.operation == 'copyToS3Redshift') {
-                console.log('Received dyn2s3red message: ' + body);
-                rsCopy.copyDynamoToRedshiftViaS3(region, dyn_tablename, body, std_callback);
-            }
-            else if (record.operation != undefined && record.operation == 'copyToRedshift') {
-                console.log('Received dyn2red message: ' + body);
-                rsCopy.copyDynamoToRedshift(region, dyn_tablename, body, std_callback);
-            }
-            else if (record.eventName == undefined || record.eventName.lastIndexOf("ObjectCreated:",0) != 0) {
+            if (record.eventName == undefined || record.eventName.lastIndexOf("ObjectCreated:",0) != 0) {
                 // not a message we're interested in, but have daemon remove message
                 res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
                 res.end();

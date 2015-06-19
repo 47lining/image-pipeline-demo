@@ -23,27 +23,40 @@ function writeS3ToRedshift(bucketName, key, callback) {
 }
 
 function writeToRedshift(from_str, args, callback) {
-    var client = new pg.Client(
-    {
-        user: rs_username,
-        database: rs_database,
-        password: rs_password,
-        port: rs_port,
-        host: rs_host
-    });
+    var accessKeyId = "", secretAccessKey = "";
+    if (AWS.config.credentials == undefined) {
+        // Now set temporary credentials seeded from the master credentials
+        AWS.config.credentials = new AWS.EC2MetadataCredentials({
+          httpOptions: { timeout: 5000 } // 5 second timeout
+        });
+        AWS.config.credentials.refresh();
+    }
+    accessKeyId = AWS.config.credentials.accessKeyId;
+    secretAccessKey = AWS.config.credentials.secretAccessKey;
     var query = "COPY imageprocessingtable from "+ from_str
-            +" credentials 'aws_access_key_id="+AWS.config.credentials.accessKeyId+";aws_secret_access_key="+AWS.config.credentials.secretAccessKey+"' "
+            +" credentials 'aws_access_key_id="+accessKeyId+";aws_secret_access_key="+secretAccessKey+"' "
             + args
             +" TIMEFORMAT AS 'YYYY:MM:DD HH:MI:SS' "
     ;
-    if (debug) console.log("RS Query: "+query);
     var outer_callback = callback;
-    client.connect(function(err) {
-        if (err) {
-            console.log("ERROR: "+err);
-            outer_callback(err);
-            return;
+    console.log("Connecting to "+rs_database+" on "+rs_host);
+    var conString = "postgres://"+rs_username+":"+rs_password+"@"+
+        rs_host+":"+rs_port+"/"+rs_database;
+
+    var client = new pg.Client(
+        {
+            user: rs_username,
+            database: rs_database,
+            password: rs_password,
+            port: rs_port,
+            host: rs_host
         }
+    );
+    client.connect(function(err) {
+        if(err) {
+            return console.error('could not connect to postgres', err);
+        }
+        if (debug) console.log("About to run Query: "+query);
         client.query(query, "",
             function(err, result) {
                 if (debug) console.log(">>> query callback.. ");
@@ -53,7 +66,7 @@ function writeToRedshift(from_str, args, callback) {
                 }
                 if (outer_callback) {
                     if (debug) console.log(">>> outer callback.. ");
-                    outer_callback(err, result);
+                    outer_callback(err, "All done - don't write database");
                     if (debug) console.log("<<< outer callback.. ");
                 }
                 if (debug) console.log("<<< query callback.. ");
@@ -61,6 +74,7 @@ function writeToRedshift(from_str, args, callback) {
         );
         if (debug) console.log("<<< connect callback.. ");
     });
+
     if (debug) console.log("<<< writeToRedshift");
 }
 
