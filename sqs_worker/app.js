@@ -42,6 +42,7 @@ var
     dyn_tablename = process.env.DYN_TABLENAME || "table-imageproc",
     http = require('http'),
     rsCopy = require("./toRedshift"),
+    imageProc = require("./imageProc"),
     fs = require('fs'),
     AWS = require('aws-sdk'),
     DOC = require("dynamodb-doc"),
@@ -56,7 +57,10 @@ var
 
 AWS.config.update({ region: region });
 
-function writeDatabase(output, res) {
+function writeDatabase(output) {
+    if (output['key'] == undefined) {
+        output['key'] = uuid.v4();
+    }
     ddb.putItem(
         { "TableName": dyn_tablename, "Item": output},
         function(err,data) {
@@ -71,167 +75,23 @@ function writeDatabase(output, res) {
         }
     );
 }
-function writeFile(url, latitude, longitude, originalDate, bucket_name, filepath, res) {
-    // filepath images/iphone_4s_pic.jpeg
-    // replace file extension with "json"
-    console.log(">>> writeFile: filepath: "+filepath);
 
-    var output = {
-        "key": uuid.v4(),
-        "dateoriginal": originalDate,
-        "url": url,
-        "gpslatitude": latitude,
-        "gpslongitude": longitude,
-        "image": filepath
-    };
-    var dot = filepath.lastIndexOf(".");
-    if (dot == -1) {
-        jsonName = filepath+".json";
-    } else {
-        jsonName = filepath.substring(0, dot)+".json";
-    }
-    var params = {
-        Bucket: bucket_name,
-        Key: "metadata/"+jsonName,
-        Body: JSON.stringify(output)
-    };
-    s3.putObject(params, function(err, data) {
-      if (err) {
-        console.log(err, err.stack); // an error occurred
-        res.writeHead(500, 'Error writing file', {'Content-Type': 'text/plain'});
-        res.end();
-    } else {
-        // console.log(data);
-        writeDatabase(output, res);
-        // res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
-        // res.end();
-    }
-    });
-}
-
-function Frac(numerator_denominator) {
-    nd = numerator_denominator.split('/');
-    return nd[0]/nd[1];
-}
-
-function DegminsecToDecimal(orient, dms_str) {
-    console.log("DMS in: "+dms_str);
-    dms = dms_str.split(",");
-    decimal = Frac(dms[0])+(Frac(dms[1])/60.0)+(Frac(dms[2])/3600.0);
-    if (orient == 'S' || orient == 'W') {
-        decimal = - decimal;
-    }
-    return decimal;
-}
-
-function processFile(bucket_name, filename, databody, res) {
-    // data object has the following properties:
-    // Body — (Buffer, Typed Array, Blob, String, ReadableStream) Object data.
-    var image = new Image()
-    image.onload = function(){
-        var result;
-        try {
-            console.log("Starting qr decode of image...")
-            var url = qrcode.decode(image).trim();
-            console.log('result of qr code: ' + url);
-            try {
-
-            gm(databody, filename)
-                .options({imageMagick: true})
-                .identify("%[exif:*]", function (err, data) {
-                    if (err) {
-                        console.log(err, err.stack);
-                        res.writeHead(200, 'Not Image File', {'Content-Type': 'text/plain'});
-                        res.end();
-                    } else {
-                        fields = data.split('\n');
-                        for (var f in fields) {
-                            if (typeof fields[f] !== 'string') {
-                                continue;
-                            }
-                            field = fields[f].split('=');
-                            console.log("Got field: "+field[0]+", "+field[1]);
-                            if (field[0]=="exif:DateTimeOriginal") {
-                                date_time = field[1];
-                            }
-                            else if(field[0]=="exif:GPSLatitudeRef") {
-                                lat_ref = field[1];
-                            }
-                            else if(field[0]=="exif:GPSLatitude") {
-                                lat = field[1];
-                            }
-                            else if(field[0]=="exif:GPSLongitudeRef") {
-                                lon_ref = field[1];
-                            }
-                            else if(field[0]=="exif:GPSLongitude") {
-                                lon = field[1];
-                            }
-                        }
-                        var bad = false;
-                        if (typeof lat_ref === "undefined") {
-                            console.log("Missing GPSLatitudeRef");
-                            bad = true;
-                        }
-                        if (typeof lat === "undefined") {
-                            console.log("Missing GPSLatitude");
-                            bad = true;
-                        }
-                        if (typeof lon_ref === "undefined") {
-                            console.log("Missing GPSLongitudeRef");
-                            bad = true;
-                        }
-                        if (typeof lon === "undefined") {
-                            console.log("Missing GPSLongitude");
-                            bad = true;
-                        }
-                        if (typeof date_time === "undefined") {
-                            console.log("Missing DateTimeOriginal")
-                            bad = true;
-                        }
-                        if (bad) {
-                            res.writeHead(200, 'Missing field(s)', {'Content-Type': 'text/plain'});
-                            res.end();
-                        } else {
-                            latitude = DegminsecToDecimal(lat_ref, lat);
-                            longitude = DegminsecToDecimal(lon_ref, lon);
-                            writeFile(url, latitude, longitude, date_time, bucket_name, filename, res);
-                        }
-                    }
-                }
-            );
-            } catch(e) {
-                console.log('unable to read metadata: '+typeof e);
-                res.writeHead(500, 'Unable to read metadata', {'Content-Type': 'text/plain'});
-                res.end();
-            }
-        } catch(e) {
-            console.log('unable to read qr code: '+e+', presumably not an image');
-            res.writeHead(200, 'Unable to read qr code', {'Content-Type': 'text/plain'});
-            res.end();
-        }
-    };
-    console.log("Processing data byte count: "+databody.length+" from "+filename)
-    image.src = databody;
-}
-
-function readFile(bucket_name, filename, res) {
-    keyname = unescape(filename);
-    // no idea why, but "2013-01-01 14:00:00" comes thru as "2013-01-01+14:00:00"
-    keyname = keyname.replace('+', ' ');
-    var params = {
-        Bucket: bucket_name,
-        Key: keyname
-    };
-    s3.getObject(params, function(err, data) {
+function Callback(response) {
+    this.res = response;
+    this.std_callback = function(err, data) {
         if (err) {
             console.log(err, err.stack); // an error occurred
-            res.writeHead(500, 'OK', {'Content-Type': 'text/plain'});
-            res.end();
+            this.res.writeHead(500, 'Error writing record', {'Content-Type': 'text/plain'});
         } else {
-            // console.log(data.ContentType);
-            processFile(bucket_name, filename, data.Body, res);
+            // console.log(data);
+            if (err == undefined && typeof data == 'string') {
+                this.res.writeHead(200, data, {'Content-Type': 'text/plain'});
+            } else {
+                writeDatabase(data);
+            }
         }
-    });
+        this.res.end();
+    };
 }
 
 function handleMessage(data, res) {
@@ -241,20 +101,13 @@ function handleMessage(data, res) {
         for (var r in obj.Records) {
             // TODO >1 record in the message?
             record = obj.Records[r];
-            if (record.operation != undefined && record.operation == 'copyToRedshift') {
+            if (record.operation != undefined && record.operation == 'copyToS3Redshift') {
+                console.log('Received dyn2s3red message: ' + body);
+                rsCopy.copyDynamoToRedshiftViaS3(region, dyn_tablename, body, std_callback);
+            }
+            else if (record.operation != undefined && record.operation == 'copyToRedshift') {
                 console.log('Received dyn2red message: ' + body);
-                rsCopy.copyToRedshift(region, dyn_tablename, body,
-                    function(err,data) {
-                        if (err) {
-                            console.log(err, err.stack); // an error occurred
-                            res.writeHead(500, 'Error writing record', {'Content-Type': 'text/plain'});
-                        } else {
-                            // console.log(data);
-                            res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
-                        }
-                        res.end();
-                    }
-                );
+                rsCopy.copyDynamoToRedshift(region, dyn_tablename, body, std_callback);
             }
             else if (record.eventName == undefined || record.eventName.lastIndexOf("ObjectCreated:",0) != 0) {
                 // not a message we're interested in, but have daemon remove message
@@ -271,7 +124,8 @@ function handleMessage(data, res) {
                 res.writeHead(500, 'OK', {'Content-Type': 'text/plain'});
                 res.end();
             } else {
-                readFile(record.s3.bucket.name, record.s3.object.key, res);
+                cb = new Callback(res);
+                imageProc.readFile(record.s3.bucket.name, record.s3.object.key, cb.std_callback);
             }
         }
     }
@@ -281,6 +135,7 @@ function handleMessage(data, res) {
         res.end();
     }
 }
+
 var server = http.createServer(function (req, res) {
     if (req.method === 'POST') {
         var body = '';
@@ -293,20 +148,6 @@ var server = http.createServer(function (req, res) {
             if (req.url === '/') {
                 console.log('Received message: ' + body);
                 handleMessage(body, res);
-            } else if (req.url === '/dyn2red') {
-                console.log('Received dyn2red message: ' + body);
-                rsCopy.copyToRedshift(region, dyn_tablename, body,
-                    function(err,data) {
-                        if (err) {
-                            console.log(err, err.stack); // an error occurred
-                            res.writeHead(500, 'Error writing record', {'Content-Type': 'text/plain'});
-                        } else {
-                            // console.log(data);
-                            res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
-                        }
-                        res.end();
-                    }
-                );
             } else if (req.url === '/heartbeat') {
                 res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
                 res.end();

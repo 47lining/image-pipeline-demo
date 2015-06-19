@@ -14,7 +14,15 @@ var
     rs_host = process.env.RSDB_HOST || "redshift."+cage+"."+customer+".47lining.com",
 	rsCopy = new Object();
 
-function writeToRedshift(bucketName, key, callback) {
+function writeDynamoToRedshift(table, callback) {
+    writeToRedshift("'dynamodb://"+table+"'", "READRATIO 100", callback);
+}
+
+function writeS3ToRedshift(bucketName, key, callback) {
+    writeToRedshift("'s3://"+bucketName+"/"+key+"'", " JSON 'auto'", callback);
+}
+
+function writeToRedshift(from_str, args, callback) {
     var client = new pg.Client(
     {
         user: rs_username,
@@ -23,33 +31,33 @@ function writeToRedshift(bucketName, key, callback) {
         port: rs_port,
         host: rs_host
     });
-    var query = "COPY imageprocessingtable from 's3://"+bucketName+"/"+key+"'"
-	    	+" credentials 'aws_access_key_id="+AWS.config.credentials.accessKeyId+";aws_secret_access_key="+AWS.config.credentials.secretAccessKey+"'"
-	    	+" JSON 'auto'"
-	    	+" TIMEFORMAT AS 'YYYY:MM:DD HH:MI:SS' "
-	;
-	if (debug) console.log("RS Query: "+query);
-	var outer_callback = callback;
+    var query = "COPY imageprocessingtable from "+ from_str
+            +" credentials 'aws_access_key_id="+AWS.config.credentials.accessKeyId+";aws_secret_access_key="+AWS.config.credentials.secretAccessKey+"' "
+            + args
+            +" TIMEFORMAT AS 'YYYY:MM:DD HH:MI:SS' "
+    ;
+    if (debug) console.log("RS Query: "+query);
+    var outer_callback = callback;
     client.connect(function(err) {
-    	if (err) {
-    		console.log("ERROR: "+err);
+        if (err) {
+            console.log("ERROR: "+err);
             outer_callback(err);
-    		return;
-    	}
-	    client.query(query, "",
-        	function(err, result) {
+            return;
+        }
+        client.query(query, "",
+            function(err, result) {
                 if (debug) console.log(">>> query callback.. ");
                 client.end();
-		    	if (err) {
-		    		console.log("ERROR: "+err);
-		    	}
-          		if (outer_callback) {
-		            if (debug) console.log(">>> outer callback.. ");
-          			outer_callback(err, result);
+                if (err) {
+                    console.log("ERROR: "+err);
+                }
+                if (outer_callback) {
+                    if (debug) console.log(">>> outer callback.. ");
+                    outer_callback(err, result);
                     if (debug) console.log("<<< outer callback.. ");
-          		}
-	            if (debug) console.log("<<< query callback.. ");
-        	}
+                }
+                if (debug) console.log("<<< query callback.. ");
+            }
         );
         if (debug) console.log("<<< connect callback.. ");
     });
@@ -57,6 +65,8 @@ function writeToRedshift(bucketName, key, callback) {
 }
 
 function writeToS3(dynamo_data, callback) {
+    // N.B. this might take a wad of memory all items and strings - 
+    // TODO look at stream implementation
     bucketName = 'dynamo-archive-'+uuid.v4();
     console.log(">>> writingTo S3 bucket "+bucketName+", rows: "+dynamo_data.length);
 	var output_data = "";
@@ -78,8 +88,8 @@ function writeToS3(dynamo_data, callback) {
     });
 }
 
-rsCopy.copyToRedshift = function(region, dyn_tablename, query_data, callback) {
-    if (debug) console.log(">>> copyToRedshift: "+dyn_tablename);
+rsCopy.copyDynamoToRedshiftViaS3 = function(region, dyn_tablename, query_data, callback) {
+    if (debug) console.log(">>> copyToRedshiftViaS3: "+dyn_tablename);
 	AWS.config.update({ region: region });
 	readTable.scanMetadata(dyn_tablename, 
 		function(err, data) {
@@ -91,5 +101,11 @@ rsCopy.copyToRedshift = function(region, dyn_tablename, query_data, callback) {
 			writeToS3(data.Items, callback);
 		}
 	);
+};
+
+rsCopy.copyDynamoToRedshift = function(region, dyn_tablename, query_data, callback) {
+    if (debug) console.log(">>> copyToRedshift: "+dyn_tablename);
+    AWS.config.update({ region: region });
+    writeDynamoToRedshift(dyn_tablename, callback);
 };
 module.exports=rsCopy;
