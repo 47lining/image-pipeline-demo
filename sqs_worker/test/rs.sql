@@ -1,6 +1,6 @@
 COPY imageprocessingtable from 
 	'dynamodb://table-impagep3'
-    credentials 'aws_access_key_id=AKIAI4MPNWVZMQY2YBRA;aws_secret_access_key=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'
+    credentials 'aws_access_key_id=;aws_secret_access_key='
     READRATIO 100
     TIMEFORMAT AS 'YYYY-MM-DD HH:MI:SS' 
 
