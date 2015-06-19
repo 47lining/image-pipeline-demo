@@ -3,12 +3,13 @@ var
   Joi = require('joi'),
   tableScanner = new Object(),
   Metadata_schema = {
-    hashKey : 'image',
+    hashKey : 'key',
 
     // add the timestamp attributes (updatedAt, createdAt)
     timestamps : false,
 
     schema : {
+      key          : Joi.string(),
       dateoriginal : Joi.string(),
       image        : Joi.string(),
       url          : Joi.string(),
