@@ -6,3 +6,4 @@ wsgiref==0.1.2
 qrcode==5.1
 Pillow==2.8.1
 pyyaml==3.11
+psycopg2==2.6.1

@@ -64,24 +64,24 @@ commands:
 
 option_settings:
   - option_name: S3_BUCKET_NAME
-    value: bucket-finalworker1-test6-shoppertrak
+    value: bucket-{{worker_name}}-{{account_name}}-{{customer}}
   - option_name: DYN_TABLENAME
-    value: table-finalworker1
+    value: table-{{worker_name}}
   - option_name: RSDB_USERNAME
-    value: eputney
+    value: {{username}}
   - option_name: RSDB_PASSWORD
-    value: 47Lining
+    value: {{password}}
   - option_name: RSDB_DATABASE
     value: defaultdb
   - option_name: RSDB_PORT
     value: 5439
   - option_name: CUSTOMER
-    value: shoppertrak
+    value: {{customer}}
   - option_name: CAGE
-    value: stage
+    value: {{cage}}
   - option_name: REGION
-    value: us-west-2
+    value: {{region}}
   - option_name: S3_SOURCE_FIRST_BUCKET_NAME
-    value: image-pipeline-initial-dataset
+    value: {{firstsourcebucket}}
   - option_name: S3_SOURCE_SECOND_BUCKET_NAME
-    value: image-pipeline-second-dataset
+    value: {{secondsourcebucket}}

@@ -29,7 +29,7 @@
   debug: var=role_credentials
   when: debug_credentials
 
-- name: "provision cage via cloudformation"
+- name: "provision bucket via cloudformation"
   connection: local
   cloudformation:
     stack_name="{{ bucket_name }}"
@@ -47,14 +47,6 @@
 - name: set queue arn
   set_fact:
      queue_arn: "{{queue_provision_stack['stack_outputs']['PipelineQueueArn']}}"
-
-- name: Add initial empty metadata 'folder'
-  local_action: shell
-    AWS_ACCESS_KEY_ID="{{ role_credentials['AWS_ACCESS_KEY_ID']}}"
-    AWS_SECRET_ACCESS_KEY="{{ role_credentials['AWS_SECRET_ACCESS_KEY'] }}"
-    AWS_SECURITY_TOKEN="{{ role_credentials['AWS_SECURITY_TOKEN'] }}"
-    aws s3api put-object --bucket "{{bucket_name}}" --key "metadata/"
-  no_log: True
 
 - name: Add notification options not supported via cloudformation
   local_action: shell

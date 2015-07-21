@@ -13,4 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 cd ~/.nucleator/contrib/bucketandq/distributor
-zip -r ../distributor.zip qrcode_generator.py application.py requirements.txt specification.json storyspecification.py .ebextensions/temppackages.config
+zip -r ../distributor.zip qrcode_generator.py application.py requirements.txt specification.json storyspecification.py .ebextensions/packages.config

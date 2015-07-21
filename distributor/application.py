@@ -18,6 +18,15 @@ from storyspecification import StorySpecification
 
 import qrcode_generator as QR
 import random
+import uuid
+import psycopg2
+import subprocess
+import time
+
+import boto
+from boto import sts
+import boto.dynamodb
+import boto.s3
 
 # Create and configure the Flask app
 application = flask.Flask(__name__)
@@ -60,8 +69,8 @@ def makeBucketKey(record):
     # remove ':' and ' '
     key = key.replace(':', '')
     key = key.replace(' ', '')
-    hash = hashlib.sha1("mymessage".encode("UTF-8")).hexdigest()
-    key = hash[:4] + '-' + key
+    hash = uuid.uuid4().hex[:4]
+    key = hash + '-' + key
     return key
 
 def writeAnImage(record):
@@ -71,11 +80,105 @@ def writeAnImage(record):
     QR.create_local_image_file(image_file_name, record["product_url"], record["latitude"],
         record["longitude"], record["date_time"], tmpimagefolder+"/")
     key = makeBucketKey(record)
-    s3_location = "qrimages/" + key
+    s3_location = "q/" + key
     # print "aws s3 cp "+tmpimagefolder+"/"+image_file_name+" s3://"+bucket_name+"/"+key+"/"+image_file_name
     QR.upload_file_to_s3(bucket_name, s3_location, image_file_name, tmpimagefolder+"/")
 
+def copytoredshift(record):
+    dynamo_table_name = os.environ["DYN_TABLENAME"]
+    redshift_username = os.environ["RSDB_USERNAME"]
+    redshift_password = os.environ["RSDB_PASSWORD"]
+    redshift_database = os.environ["RSDB_DATABASE"]
+    redshift_port = os.environ["RSDB_PORT"]
+    customer = os.environ["CUSTOMER"]
+    cage = os.environ["CAGE"]
+    
+    role_name = "NucleatorBucketandqDistributorServiceRunner"
+
+    iam_conn = boto.connect_iam()
+    role = iam_conn.get_role(role_name)
+    role_arn = role["get_role_response"]["get_role_result"]["role"]["arn"]
+
+    stsconn = sts.STSConnection()
+    response = stsconn.assume_role(role_arn, "redshift_copy_session")
+    access_key = response.credentials.access_key
+    secret_key = response.credentials.secret_key
+    session_token = response.credentials.session_token
+
+    if customer is "47Lining":
+        endpoint = "redshift.%s.%s.com" % (cage, customer)
+    else:
+        endpoint = "redshift.%s.%s.47lining.com" % (cage, customer)
+
+    print "Connecting to redshift cluster: %s" % endpoint
+    conn = psycopg2.connect(dbname=redshift_database, host=endpoint, port=redshift_port, user=redshift_username, password=redshift_password)
+    cur = conn.cursor()
+
+    print "Connected. Creating table"
+    cur.execute("CREATE TABLE IF NOT EXISTS imageproccessingtable(key varchar(50) NOT NULL, url varchar(200) NOT NULL, dateoriginal timestamp NOT NULL, gpslatitude float8 NOT NULL, gpslongitude float8 NOT NULL, image varchar(100));")
+    conn.commit() 
+    
+    print "Table recreated. Running copy command..."
+    cur.execute("copy imageproccessingtable from 'dynamodb://%s' credentials 'aws_access_key_id=%s;aws_secret_access_key=%s;token=%s' readratio 100;" % (dynamo_table_name, access_key, secret_key, session_token))
+    conn.commit()  
+
+    print "Copy command completed"
+
+def copyseconddata(record):
+    region = os.environ["REGION"]
+    dest_bucket_name = os.environ["S3_BUCKET_NAME"]
+    source_bucket_name = os.environ["S3_SOURCE_SECOND_BUCKET_NAME"]
+    dynamo_table_name = os.environ["DYN_TABLENAME"]
+
+    print "Deleting and recreating dynamo table so only new records are inserted into redshift"
+    dynamo_conn = boto.dynamodb.connect_to_region(region)
+    table = dynamo_conn.get_table(dynamo_table_name)
+    dynamo_conn.delete_table(table)
+    dynamo_schema = dynamo_conn.create_schema(hash_key_name='key',hash_key_proto_value=str)
+    time.sleep(5)
+    print "Sleeping for 5 seconds to let table delete"
+    table = dynamo_conn.create_table(name=dynamo_table_name,schema=dynamo_schema,read_units=500, write_units=150)
+
+    role_name = "NucleatorBucketandqDistributorServiceRunner"
+    iam_conn = boto.connect_iam()
+    role = iam_conn.get_role(role_name)
+    role_arn = role["get_role_response"]["get_role_result"]["role"]["arn"]
+    stsconn = sts.STSConnection()
+    response = stsconn.assume_role(role_arn, "redshift_copy_session")
+    access_key = response.credentials.access_key
+    secret_key = response.credentials.secret_key
+    session_token = response.credentials.session_token
+
+    print "Running S3 Copy Command"
+    command = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s; aws s3 cp s3://%s/ s3://%s/ --recursive --include '*' > /dev/null" % (access_key, secret_key, session_token, source_bucket_name, dest_bucket_name)
+    subprocess.call(command, shell=True)
+
+    copytoredshift(record)
+
+def copyinitialdata(record):
+    region = os.environ["REGION"]
+    dest_bucket_name = os.environ["S3_BUCKET_NAME"]
+    source_bucket_name = os.environ["S3_SOURCE_FIRST_BUCKET_NAME"]
+    dynamo_table_name = os.environ["DYN_TABLENAME"]
+
+    role_name = "NucleatorBucketandqDistributorServiceRunner"
+    iam_conn = boto.connect_iam()
+    role = iam_conn.get_role(role_name)
+    role_arn = role["get_role_response"]["get_role_result"]["role"]["arn"]
+    stsconn = sts.STSConnection()
+    response = stsconn.assume_role(role_arn, "redshift_copy_session")
+    access_key = response.credentials.access_key
+    secret_key = response.credentials.secret_key
+    session_token = response.credentials.session_token
+
+    print "Running S3 Copy Command"
+    command = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s; aws s3 cp s3://%s/ s3://%s/ --recursive --include '*' > /dev/null" % (access_key, secret_key, session_token, source_bucket_name, dest_bucket_name)
+    subprocess.call(command, shell=True)
+
+    copytoredshift(record)
+
 def handleMessage(message):
+    print "Message = ", message
     if "date" in message:
         msg_date = message["date"]
         if storySpec.generate_record(msg_date):
@@ -87,6 +190,12 @@ def handleMessage(message):
     elif "product_url" in message:
         # write the image
         writeAnImage(message)
+    elif "redshift_initial_copy" in message:
+        # write the image
+        copyinitialdata(message)
+    elif "redshift_second_copy" in message:
+        # write the image
+        copyseconddata(message)
 
 @application.route('/', methods=['POST'])
 def proc_message():
@@ -107,6 +216,12 @@ def proc_message():
             logging.exception('Error processing message: %s' % request.json)
             response = Response(ex.message, status=500)
     return response
+
+# here we are going to use boto to up the message visibility timeout
+#region = os.environ["REGION"]
+#connection = boto.sqs.connect_to_region(region)
+#queue = get_queue(queue_name)
+#connection.set_queue_attribute(queue, 'VisibilityTimeout', 900) # 15 min
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0')

@@ -40,13 +40,19 @@ export username
 echo "Enter the password for the redshift cluster: "
 read password
 export password
-
-sed -e "s/Replace_Queue_Bucket_Name/bucket-${worker_name}-${account_name}-${customer}/g" ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/packages.config > ~/.nucleator/contrib/bucketandq/distributor/.ebextensions/temppackages.config
+echo "Enter the source bucket for the first dataset: "
+read firstsourcebucket
+export firstsourcebucket
+echo "Enter the source bucket for the second dataset: "
+read secondsourcebucket
+export secondsourcebucket
 
 cd ~/.nucleator/contrib/bucketandq/sqs_worker/
 j2 -f env .ebextensions/packages.j2 > .ebextensions/packages.config
 sh ../bin/worker_package
 
+cd ~/.nucleator/contrib/bucketandq/distributor/
+j2 -f env .ebextensions/packages.j2 > .ebextensions/packages.config
 sh ~/.nucleator/contrib/bucketandq/bin/distributor_package
 
 worker_url="file://$HOME/.nucleator/contrib/bucketandq/sqs_worker.zip"
@@ -61,15 +67,14 @@ nucleator bucketandq provision --customer $customer --cage $cage --app_name $wor
 
 echo "Enter the $worker_name sqs url from the aws console: "
 read queue_url
-echo "Enter the SQS Worker Service Runner role name from the aws console: "
-read sqsworkerrolename
-echo "Enter the Distributor Service Runner role name from the aws console: "
-read distributorrolename
 
-nucleator beanstalk provision --customer $customer --cage $cage --type nodejs --tier worker --app_name $worker_name --queue_url $queue_url --service_role $sqsworkerrolename --beanstalk_instance_type t2.small
+nucleator beanstalk provision --customer $customer --cage $cage --type nodejs --tier worker --app_name $worker_name --queue_url $queue_url --service_role NucleatorBucketandqSQSWorkerServiceRunner --beanstalk_instance_type t2.small --minscale 12 --maxscale 12
 nucleator beanstalk configure --customer $customer --cage $cage --app_name $worker_name
 nucleator beanstalk deploy --customer $customer --cage $cage --app_name $worker_name --app_version $app_version --app_url $worker_url
 
-nucleator beanstalk provision --customer $customer --cage $cage --type python --tier worker --app_name $distributor_name --service_role $distributorrolename --beanstalk_instance_type t2.small
+nucleator beanstalk provision --customer $customer --cage $cage --type python --tier worker --app_name $distributor_name --service_role NucleatorBucketandqDistributorServiceRunner --beanstalk_instance_type t2.medium --minscale 1 --maxscale 1 --inactivity_timeout 1800 --visibility_timeout 1800
 nucleator beanstalk configure --customer $customer --cage $cage --app_name $distributor_name
 nucleator beanstalk deploy --customer $customer --cage $cage --app_name $distributor_name --app_version $app_version --app_url $distributor_url
+
+cd ~/.nucleator/contrib/bucketandq/distributor/
+sh sendqueuemessage.sh

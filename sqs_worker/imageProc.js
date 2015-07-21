@@ -33,14 +33,7 @@ function writeFile(url, latitude, longitude, originalDate, bucket_name, filepath
         Key: "metadata/"+jsonName,
         Body: JSON.stringify(output)
     };
-    s3.putObject(params, function(err, data) {
-        if (err) {
-            console.log(err, err.stack); // an error occurred
-            callback(err, 'Error writing file');
-	    } else {
-            callback(undefined, output);
-        }
-    });
+    callback(undefined, output);
 }
 
 function Frac(numerator_denominator) {

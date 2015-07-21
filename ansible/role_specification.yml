@@ -96,3 +96,146 @@ role_specification:
                 - "sqs:GetQueueUrl"
                 - "sqs:SendMessage"
               Resource: arn:aws:sqs:*
+  - role_name: NucleatorBucketandqSQSWorkerServiceRunner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBucketandqSQSWorkerServiceRunnerTrustPolicy
+          Principal :
+            Service : ec2.amazonaws.com
+          Action : sts:AssumeRole
+        - Effect : Allow
+          Sid : NucleatorBucketandqDistributorServiceRunnerTrustPolicy2
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies :
+      - policy_name: NucleatorBucketandqSQSWorkerServiceRunnerAccessPolicy
+        policy_document: 
+          Statement: 
+            - Effect: Allow
+              Action: 
+                - "sqs:GetQueueAttributes"
+                - "sqs:ReceiveMessage"
+                - "sqs:DeleteMessage"
+              Resource: arn:aws:sqs:*
+            - Effect: Allow
+              Action: 
+                - "cloudwatch:PutMetricAlarm"
+                - "cloudwatch:PutMetricData"
+              Resource: '*'
+            - Effect: Allow
+              Action: 
+                - "s3:ListBucket"
+                - "s3:PutObject"
+                - "s3:GetObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action: 
+                - "dynamodb:PutItem"
+              Resource: arn:aws:dynamodb:*
+  - role_name: NucleatorBucketandqDistributorServiceRunner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBucketandqDistributorServiceRunnerTrustPolicy1
+          Principal :
+            Service : ec2.amazonaws.com
+          Action : sts:AssumeRole
+        - Effect : Allow
+          Sid : NucleatorBucketandqDistributorServiceRunnerTrustPolicy2
+          Principal :
+            AWS : "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBucketandqDistributorServiceRunnerAccessPolicy
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "sqs:GetQueueAttributes"
+                - "sqs:ReceiveMessage"
+                - "sqs:DeleteMessage"
+              Resource: arn:aws:sqs:*
+            - Effect: Allow
+              Action:
+                - "cloudwatch:PutMetricAlarm"
+                - "cloudwatch:PutMetricData"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:PutObject"
+                - "s3:GetObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "cloudwatch:PutMetricAlarm"
+                - "cloudwatch:PutMetricData"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "iam:GetRole"
+              Resource: arn:aws:iam::*
+            - Effect: Allow
+              Action:
+                - "dynamodb:Scan"
+                - "dynamodb:DescribeTable"
+                - "dynamodb:CreateTable"
+                - "dynamodb:DeleteTable"
+              Resource: '*'
+  - role_name: NucleatorBucketandqDistributorServiceRunner
+    trust_policy:
+      Version : "2008-10-17"
+      Statement :
+        - Effect : Allow
+          Sid : NucleatorBucketandqDistributorServiceRunnerTrustPolicy1
+          Principal :
+            Service : ec2.amazonaws.com
+          Action : sts:AssumeRole
+        - Effect : Allow
+          Sid : NucleatorBucketandqDistributorServiceRunnerTrustPolicy2
+          Principal :
+            AWS : 
+              - "arn:aws:iam::{{ aws_accounts[account_name]['account_number'] }}:role/NucleatorBucketandqDistributorServiceRunner"
+              - "arn:aws:iam::{{ aws_accounts[cage_names['build']['account']]['account_number'] }}:role/NucleatorAgent"
+          Action : sts:AssumeRole
+    access_policies:
+      - policy_name: NucleatorBucketandqDistributorServiceRunnerAccessPolicy
+        policy_document:
+          Statement :
+            - Effect: Allow
+              Action:
+                - "sqs:GetQueueAttributes"
+                - "sqs:ReceiveMessage"
+                - "sqs:DeleteMessage"
+              Resource: arn:aws:sqs:*
+            - Effect: Allow
+              Action:
+                - "cloudwatch:PutMetricAlarm"
+                - "cloudwatch:PutMetricData"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "s3:ListBucket"
+                - "s3:PutObject"
+                - "s3:GetObject"
+              Resource: arn:aws:s3:::*
+            - Effect: Allow
+              Action:
+                - "cloudwatch:PutMetricAlarm"
+                - "cloudwatch:PutMetricData"
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - "iam:GetRole"
+              Resource: arn:aws:iam::*
+            - Effect: Allow
+              Action:
+                - "dynamodb:Scan"
+                - "dynamodb:DescribeTable"
+                - "dynamodb:CreateTable"
+                - "dynamodb:DeleteTable"
+              Resource: '*'
