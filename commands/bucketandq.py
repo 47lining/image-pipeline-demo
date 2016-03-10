@@ -37,6 +37,7 @@ class BucketAndQ(Command):
             "customer_name": customer,
             "app_name": app_name,
             "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
             "rs_url": kwargs.get("redshift_url", None),
         }
         
@@ -44,7 +45,7 @@ class BucketAndQ(Command):
         command_list.append("account")
         command_list.append("cage")  # because stackset/ansible/roles/instan... depends on cage_provision
         command_list.append("bucketandq")
-        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None))
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None))
         
         return cli.safe_playbook(self.get_command_playbook("bucketandq-provision.yml"),
             is_static=True, # do not use dynamic inventory script, credentials may not be available
@@ -65,13 +66,14 @@ class BucketAndQ(Command):
             "customer_name": customer,
             "queue_name": queue_name,
             "verbosity": kwargs.get("verbosity", None),
+            "debug_credentials": kwargs.get("debug_credentials", None),
         }
         
         playbook = "orchestrate.yml"
 
         command_list = []
         command_list.append("bucketandq")
-        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None))
+        cli.obtain_credentials(commands = command_list, cage=cage, customer=customer, verbosity=kwargs.get("verbosity", None), debug_credentials=kwargs.get("debug_credentials", None))
         
         return cli.safe_playbook(self.get_command_playbook(playbook),
             is_static=True, # do not use dynamic inventory script, credentials may not be available
